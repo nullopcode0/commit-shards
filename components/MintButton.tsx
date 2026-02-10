@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useSession, signIn } from 'next-auth/react';
-import { mintShard } from '@/lib/solana/mint';
+import { mintShard, mintShardBatch } from '@/lib/solana/mint';
 import { generateShardSVG, extractShardTraits, type ShardConfig } from '@/lib/shard-generator';
 import { ShareButtons } from '@/components/ShareButtons';
 
@@ -39,66 +39,87 @@ export function MintButton({ items }: Props) {
     setResults([]);
 
     try {
-      const minted: MintResult[] = [];
+      // Phase 1: Parallel uploads — all metadata goes to Irys at once
+      setProgress(`Uploading ${items.length} shard${items.length > 1 ? 's' : ''}...`);
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-
-        // Upload SVG + metadata to Irys via API route
-        setProgress(`Uploading ${i + 1}/${items.length}...`);
+      const uploadPayloads = items.map((item) => {
         const svg = generateShardSVG(item.config);
         const traits = extractShardTraits(item.config);
-        // Only mark as verified if the OAuth user matches the PR author
         const isVerifiedAuthor = !!(githubUsername && item.config.author &&
           githubUsername.toLowerCase() === item.config.author.toLowerCase());
 
-        const metadata = {
-          name: item.name,
-          symbol: 'COMSHARD',
-          description: `Commit Shard — generative crystal art from ${item.config.commitSha.slice(0, 8)}`,
-          attributes: [
-            { trait_type: 'Commit', value: item.config.commitSha.slice(0, 8) },
-            { trait_type: 'Repo', value: item.config.repo },
-            ...(item.config.author ? [{ trait_type: 'Author', value: item.config.author }] : []),
-            ...(isVerifiedAuthor ? [{ trait_type: 'GitHub Verified', value: githubUsername }] : []),
-            ...traits,
-          ],
+        return {
+          svg,
+          sha: item.config.commitSha,
+          isVerifiedAuthor,
+          metadata: {
+            name: item.name,
+            symbol: 'COMSHARD',
+            description: `Commit Shard — generative crystal art from ${item.config.commitSha.slice(0, 8)}`,
+            attributes: [
+              { trait_type: 'Commit', value: item.config.commitSha.slice(0, 8) },
+              { trait_type: 'Repo', value: item.config.repo },
+              ...(item.config.author ? [{ trait_type: 'Author', value: item.config.author }] : []),
+              ...(isVerifiedAuthor ? [{ trait_type: 'GitHub Verified', value: githubUsername }] : []),
+              ...traits,
+            ],
+          },
         };
+      });
 
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ svg, metadata, sha: item.config.commitSha }),
-        });
+      const uploadResults = await Promise.all(
+        uploadPayloads.map(async (payload) => {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ svg: payload.svg, metadata: payload.metadata, sha: payload.sha }),
+          });
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Upload failed');
+          }
+          return res.json();
+        })
+      );
 
-        if (!uploadRes.ok) {
-          const err = await uploadRes.json();
-          throw new Error(err.error || 'Upload failed');
-        }
+      // Phase 2: Batch mint — single wallet popup for all transactions
+      const shards = uploadResults.map((r, i) => ({
+        metadataUri: r.metadataUri,
+        name: items[i].name,
+      }));
 
-        const { metadataUri } = await uploadRes.json();
+      let minted: MintResult[];
 
-        // Mint NFT (user signs wallet tx)
-        setProgress(`Minting ${i + 1}/${items.length}...`);
-        const result = await mintShard(wallet.wallet.adapter, metadataUri, item.name);
-        const mintAddr = String(result.mintAddress);
-        minted.push({ name: item.name, mintAddress: mintAddr });
+      if (shards.length === 1) {
+        setProgress('Minting...');
+        const result = await mintShard(wallet.wallet.adapter, shards[0].metadataUri, shards[0].name);
+        minted = [{ name: shards[0].name, mintAddress: String(result.mintAddress) }];
+      } else {
+        setProgress(`Approve batch mint (${shards.length} shards)...`);
+        const batchResults = await mintShardBatch(wallet.wallet.adapter, shards);
+        minted = batchResults.map((r, i) => ({
+          name: shards[i].name,
+          mintAddress: String(r.mintAddress),
+        }));
+      }
 
-        // Verify collection + creator + register on-chain attributes (non-blocking)
+      setResults(minted);
+
+      // Phase 3: Fire-and-forget verify calls for all minted shards
+      minted.forEach((result, i) => {
         fetch('/api/verify-shard', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            mintAddress: mintAddr,
-            sha: item.config.commitSha,
-            repo: item.config.repo,
-            author: item.config.author || '',
-            githubVerified: isVerifiedAuthor,
+            mintAddress: result.mintAddress,
+            sha: items[i].config.commitSha,
+            repo: items[i].config.repo,
+            author: items[i].config.author || '',
+            githubVerified: uploadPayloads[i].isVerifiedAuthor,
           }),
-        }).catch(() => {}); // fire-and-forget
-      }
+        }).catch(() => {});
+      });
 
-      setResults(minted);
       setProgress('');
     } catch (err: any) {
       setError(err.message || 'Mint failed');
