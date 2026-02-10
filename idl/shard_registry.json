@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0",
+  "name": "shard_registry",
+  "instructions": [
+    {
+      "name": "registerShard",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "shardRecord", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "sha", "type": { "array": ["u8", 20] } },
+        { "name": "repo", "type": "string" },
+        { "name": "author", "type": "string" },
+        { "name": "githubVerified", "type": "bool" }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ShardRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "mint", "type": "publicKey" },
+          { "name": "sha", "type": { "array": ["u8", 20] } },
+          { "name": "repo", "type": "string" },
+          { "name": "author", "type": "string" },
+          { "name": "githubVerified", "type": "bool" },
+          { "name": "mintedAt", "type": "i64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "RepoTooLong", "msg": "Repo name exceeds 64 characters" },
+    { "code": 6001, "name": "AuthorTooLong", "msg": "Author name exceeds 40 characters" }
+  ]
+}

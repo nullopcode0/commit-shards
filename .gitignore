@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# vercel
+.vercel/
+
+# env files
+.env*.local
+
+# build
+target/
+*.so
+
+# anchor keypairs (program IDs are in Anchor.toml + declare_id!)
+programs/*/keypair.json
+
+# sample output
+output/
+
+# misc
+.DS_Store
+*.pem
+
+# turbo
+.turbo/
