@@ -9,7 +9,7 @@ const DEVNET_RPC = 'https://api.devnet.solana.com';
 const CREATOR_WALLET = publicKey('CGiuetrCxiaibJuxxCvrRjMyEjgmVEngxmvBXJtrmB5y');
 const MINT_PRICE = sol(0.05);
 const COLLECTION_MINT = publicKey(
-  process.env.NEXT_PUBLIC_COLLECTION_MINT || '66XzVHiPnnteArtAnsWjPG7445DD5rsuBJxt4h5Lv7UN'
+  (process.env.NEXT_PUBLIC_COLLECTION_MINT || '66XzVHiPnnteArtAnsWjPG7445DD5rsuBJxt4h5Lv7UN').trim()
 );
 
 export async function mintShard(
