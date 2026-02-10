@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    sitemap: 'https://commit-shards.vercel.app/sitemap.xml',
+    sitemap: 'https://shards.nullopcode.cv/sitemap.xml',
   };
 }

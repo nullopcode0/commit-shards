@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://commit-shards.vercel.app';
+  const base = 'https://shards.nullopcode.cv';
 
   return [
     { url: base, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },

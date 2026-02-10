@@ -51,7 +51,7 @@ async function main() {
     symbol: 'COMSHARD',
     description: 'Generative crystal art from git commits on Solana',
     image: imageUri,
-    external_url: 'https://commit-shards.vercel.app',
+    external_url: 'https://shards.nullopcode.cv',
   };
 
   console.log('Uploading collection metadata...');

@@ -46,6 +46,6 @@ Commit Shards is a web application that turns GitHub pull request commits into u
 
 ## Links
 
-- Website: https://commit-shards.vercel.app
+- Website: https://shards.nullopcode.cv
 - Collection: 66XzVHiPnnteArtAnsWjPG7445DD5rsuBJxt4h5Lv7UN (Solana devnet)
 - Shard Registry Program: 97Lqqtuu4bsZS6e8EacvasJe5heLbjs5pWUt1Ru83GLA (Solana devnet)

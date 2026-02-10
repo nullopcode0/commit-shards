@@ -9,7 +9,7 @@ interface Props {
 
 export function ShareButtons({ shardName, mintAddress }: Props) {
   const shareData = useMemo(() => {
-    const base = typeof window !== 'undefined' ? window.location.origin : 'https://commit-shards.vercel.app';
+    const base = typeof window !== 'undefined' ? window.location.origin : 'https://shards.nullopcode.cv';
     const url = `${base}/shard/${mintAddress}`;
     const text = `I minted ${shardName} on Commit Shards — generative crystal art from git commits on Solana`;
     return { url, text };

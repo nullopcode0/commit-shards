@@ -3,7 +3,7 @@ import { SolanaProviders } from '@/lib/solana/providers';
 import { AuthProvider } from '@/components/AuthProvider';
 import './globals.css';
 
-const SITE_URL = 'https://commit-shards.vercel.app';
+const SITE_URL = 'https://shards.nullopcode.cv';
 
 export const metadata: Metadata = {
   title: {
