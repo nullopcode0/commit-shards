@@ -1,0 +1,51 @@
+# Commit Shards
+
+> Generative crystal NFT art from git commits, minted on Solana.
+
+## What is Commit Shards?
+
+Commit Shards is a web application that turns GitHub pull request commits into unique, deterministic generative crystal NFT art on the Solana blockchain. Each shard is derived from a commit SHA — the same hash always produces the same crystal.
+
+## How it works
+
+1. Enter a GitHub username to find merged pull requests
+2. Select PRs to mint as crystal shard NFTs
+3. Each shard is generated deterministically from the commit SHA
+4. SVG art and metadata are stored permanently on Arweave via Irys
+5. NFTs are minted as Metaplex tokens on Solana (devnet)
+6. Optional: Sign in with GitHub for verified creator status
+
+## Key features
+
+- Deterministic generative art: same SHA = same crystal, always
+- On-chain attributes via custom Anchor program (shard-registry)
+- 1-per-SHA uniqueness enforcement
+- GitHub OAuth for verified creator attribution
+- Collection NFT with verified creators
+- Gallery, leaderboard, and per-shard detail pages
+- Social sharing (X, Bluesky, Farcaster, Lens)
+
+## Technical stack
+
+- Next.js 14 (App Router)
+- Solana (devnet), Metaplex Token Metadata v3
+- Arweave/Irys for permanent storage
+- Anchor 0.29 (shard-registry program)
+- next-auth v4 (GitHub OAuth)
+
+## Pages
+
+- / — Mint page: search GitHub PRs or generate random art
+- /gallery — Browse all minted shards
+- /leaderboard — Top minters ranked by shard count
+- /shard/[mint] — Individual shard detail with on-chain data
+
+## Pricing
+
+0.05 SOL per mint (devnet)
+
+## Links
+
+- Website: https://commit-shards.vercel.app
+- Collection: 66XzVHiPnnteArtAnsWjPG7445DD5rsuBJxt4h5Lv7UN (Solana devnet)
+- Shard Registry Program: 97Lqqtuu4bsZS6e8EacvasJe5heLbjs5pWUt1Ru83GLA (Solana devnet)

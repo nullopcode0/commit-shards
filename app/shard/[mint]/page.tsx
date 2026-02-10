@@ -46,9 +46,25 @@ export async function generateMetadata(
   { params }: { params: { mint: string } }
 ): Promise<Metadata> {
   const data = await fetchShardData(params.mint);
+  const title = data ? data.name : 'Shard Not Found';
+  const description = data?.json.description || 'Generative crystal art from git commits';
+  const image = data?.json.image;
+
   return {
-    title: data ? `${data.name} | Commit Shards` : 'Shard Not Found',
-    description: data?.json.description || 'Generative crystal art from git commits',
+    title,
+    description,
+    openGraph: {
+      title: `${title} | Commit Shards`,
+      description,
+      ...(image && { images: [{ url: image, alt: title }] }),
+      type: 'article',
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title: `${title} | Commit Shards`,
+      description,
+      ...(image && { images: [image] }),
+    },
   };
 }
 
